@@ -118,15 +118,13 @@ Mama Route URL: ${url}
     httpExceptionHandler(e)
   }
 
-  let entities = [
-    {
-      __type: `wordpress__site_metadata`,
-      name: allRoutes.data.name,
-      description: allRoutes.data.description,
-      url: allRoutes.data.url,
-      home: allRoutes.data.home,
-    },
-  ]
+  let entities = [{
+    __type: `wordpress__site_metadata`,
+    name: allRoutes.data.name,
+    description: allRoutes.data.description,
+    url: allRoutes.data.url,
+    home: allRoutes.data.home,
+  }, ]
 
   if (allRoutes) {
     let validRoutes = getValidRoutes({
@@ -362,8 +360,7 @@ async function fetchData({
  * @param {number} [page=1]
  * @returns
  */
-async function getPages(
-  { url, _perPage, _auth, _accessToken, _concurrentRequests, _verbose },
+async function getPages({ url, _perPage, _auth, _accessToken, _concurrentRequests, _verbose },
   page = 1
 ) {
   try {
@@ -403,20 +400,21 @@ async function getPages(
     result = result.concat(data)
 
     // Some resources have no paging, e.g. `/types`
-    const wpTotal = headers[`x-wp-total`]
+    // const wpTotal = headers[`x-wp-total`]
 
-    const total = parseInt(wpTotal)
-    const totalPages = parseInt(headers[`x-wp-totalpages`])
+    // const total = parseInt(wpTotal)
+    // const totalPages = parseInt(headers[`x-wp-totalpages`])
+    const totalPages = 3 // Temporarily hardcoded
 
-    if (!wpTotal || totalPages <= 1) {
+    if (data < 100) {
       return result
     }
 
-    if (_verbose) {
-      console.log(`
-Total entities : ${total}
-Pages to be requested : ${totalPages}`)
-    }
+    //     if (_verbose) {
+    //       console.log(`
+    // Total entities : ${total}
+    // Pages to be requested : ${totalPages}`)
+    //     }
 
     // We got page 1, now we want pages 2 through totalPages
     const pageOptions = _.range(2, totalPages + 1).map(getPage =>
@@ -474,9 +472,9 @@ function getValidRoutes({
   if (_useACF) {
     let defaultAcfNamespace = `acf/v3`
     // Grab ACF Version from namespaces
-    const acfNamespace = allRoutes.data.namespaces
-      ? allRoutes.data.namespaces.find(namespace => namespace.includes(`acf`))
-      : null
+    const acfNamespace = allRoutes.data.namespaces ?
+      allRoutes.data.namespaces.find(namespace => namespace.includes(`acf`)) :
+      null
     const acfRestNamespace = acfNamespace ? acfNamespace : defaultAcfNamespace
     _includedRoutes.push(`/${acfRestNamespace}/**`)
 
@@ -490,9 +488,9 @@ function getValidRoutes({
     // The OPTIONS ACF API Route is not giving a valid _link so let`s add it manually
     // and pass ACF option page ID
     // ACF to REST v3 requires options/options
-    let optionsRoute = acfRestNamespace.includes(`3`)
-      ? `options/options/`
-      : `options/`
+    let optionsRoute = acfRestNamespace.includes(`3`) ?
+      `options/options/` :
+      `options/`
     validRoutes.push({
       url: `${url}/${acfRestNamespace}/${optionsRoute}`,
       type: `${typePrefix}acf_options`,
